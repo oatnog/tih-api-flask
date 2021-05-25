@@ -14,4 +14,4 @@ TODO:
 - API design: good? Bad? good enough?
 - Gather data via XCM API rather than reports run by hand.
 - Pregenerate "stub" data to demo
-- change "print" debugging to using "logging" module
+- ~~change "print" debugging to using "logging" module~~

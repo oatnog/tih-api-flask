@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import date
+import logging
 
 import pandas as pd
 
@@ -50,6 +51,7 @@ def load_data():
     spreadsheets = Path.cwd().joinpath('spreadsheets')
     for excel_file in spreadsheets.rglob('*.xlsx'):
         # depends on openpyxl
+        app.logger.info(f"Importing {excel_file}")
         status_on_date = pd.read_excel(excel_file, usecols=['Current Status', 'Responsible Person', 'Tax Staff'])
 
         filename_head = Path(excel_file).stem.split(' GMT')[0][14:].split('_')
@@ -61,8 +63,8 @@ def load_data():
 
         feather_pathname = feather_path.joinpath(search_date.isoformat())
         status_on_date.to_feather(feather_pathname)
-
-    return "Imported and archived the goods!"
+    app.logger.info("Completed loading data from spreadsheets")
+    return "OK"
 
 @app.route('/available-dates')
 def available_dates():
@@ -84,12 +86,12 @@ def status(isodate):
     """List all tax filings, sorted by status """
     feather_filename = feather_path.joinpath(isodate)
     if feather_filename.exists():
-        print(f"Reading in {feather_filename}")
+        app.logger.info(f"Reading in {feather_filename}")
         status_on_date = pd.read_feather(feather_filename)
         status_counts = status_on_date.value_counts('Current Status')
         # clean up a possible but unwanted Category Status
         if 'eFile-Awaiting Taxpayer Consent Form' in status_counts.keys():
-            # print("found a baddo!")
+            app.logger.info("Found and removed a bad status")
             status_counts['Completed'] += status_counts['eFile-Awaiting Taxpayer Consent Form']
             new_frame = status_counts.drop('eFile-Awaiting Taxpayer Consent Form')
             status_counts = new_frame
@@ -99,7 +101,6 @@ def status(isodate):
         categories_to_merge = ('No Longer Task/To Be Deleted', 'Filing Not Required', 'NLC')
         for category in categories_to_merge:
             if category in status_counts.keys():
-                # print("found a baddo!")
                 status_counts['NLT/FNR/NLC'] += status_counts[category]
                 new_frame = status_counts.drop(category)
                 status_counts = new_frame
@@ -112,5 +113,5 @@ def status(isodate):
 
         return jsonify(mystatus)
     else:
-        print(f"No {feather_filename} here")
+        app.logger.error(f"No {feather_filename} here")
         return "Error!"  # should I return a real http error? Look up REST stuff
