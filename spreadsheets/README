@@ -1,0 +1,7 @@
+SPREADSHEETS GO HERE
+
+Until I am able to access the xcm api, we have to run a report, save it as a spreadsheet, and import it here.
+
+This report includes a lot of information. At this point, we are just extracting the total number of each status. (The custom statuses defined by the TIH workflow are also listed in the python code.)
+
+TODO: divided up the statuses further, by responsible party, etc. 
