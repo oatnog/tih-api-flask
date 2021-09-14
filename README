@@ -1,6 +1,4 @@
-===
-TIH API README
-===
+## TIH API README
 
 Uses Pandas to import and extract data from manually-run reports.
 Exposes data via REST API (uses Flask).
